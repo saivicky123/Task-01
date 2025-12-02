@@ -2,6 +2,8 @@
 Linux Commands
 Level 1 — Basic scripts
 1) setup_users_groups.sh — create dev group + users, set home & skeleton
+
+   
 #!/usr/bin/env bash
 # Usage: sudo ./setup_users_groups.sh user1,user2 ... 
 set -euo pipefail
@@ -37,7 +39,10 @@ done
 
 echo "All done."
 
+
 2) set_project_perms.sh — set permissions for project directories
+
+   
 #!/usr/bin/env bash
 # Usage: sudo ./set_project_perms.sh /path/to/project devteam
 set -euo pipefail
@@ -60,7 +65,11 @@ find "$PROJECT_DIR" -type f -exec chmod 0664 {} \;
 
 echo "Permissions set: dirs=2775, files=664. Group=$GROUP"
 
+
+
 3) install_pkgs.sh — install common packages (works for yum/apt)
+
+   
 #!/usr/bin/env bash
 # Usage: sudo ./install_pkgs.sh git nginx default-jdk
 set -euo pipefail
@@ -86,7 +95,10 @@ fi
 
 echo "Installed: ${PKGS[*]}"
 
+
 4) system_info.sh — quick system info summary
+
+   
 #!/usr/bin/env bash
 # Usage: ./system_info.sh
 set -euo pipefail
@@ -112,8 +124,14 @@ ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%cpu | head -n 6
 echo -e "\n=== Open ports (ss) ==="
 ss -tuln
 
+
+
 Level 2 — Intermediate scripts & cron examples
+
+
 5) backup_home.sh — simple daily backup (to /backup)
+
+   
 #!/usr/bin/env bash
 # Usage: sudo ./backup_home.sh
 set -euo pipefail
@@ -135,7 +153,10 @@ echo "Backup created: $DEST"
 Example cron (daily at 2:15am):
 15 2 * * * /usr/local/bin/backup_home.sh >> /var/log/backup_home.log 2>&1
 
+
 6) log_cleanup.sh — rotate/truncate old app logs (ad-hoc)
+
+   
 #!/usr/bin/env bash
 # Usage: sudo ./log_cleanup.sh /var/log/myapp 30
 set -euo pipefail
@@ -151,7 +172,10 @@ find "$LOG_DIR" -type f -name '*.log' -mtime +7 -exec gzip -9 {} \;
 
 echo "Cleaned logs in $LOG_DIR (keep $KEEP_DAYS days)."
 
+
 7) restart_service_if_failed.sh — watch & restart systemd service
+
+   
 #!/usr/bin/env bash
 # Usage: sudo ./restart_service_if_failed.sh myapp.service
 set -euo pipefail
@@ -178,7 +202,10 @@ fi
 
 You can run this from cron every 5 minutes if you want (but prefer systemd Restart= in unit file — see level 3).
 
+
 8) healthcheck_http.sh — check HTTP endpoint and alert to syslog
+
+   
 #!/usr/bin/env bash
 # Usage: ./healthcheck_http.sh http://localhost:8080/health 200
 URL="${1:-http://localhost:8080/health}"
@@ -196,7 +223,9 @@ fi
 
 Cron example: */2 * * * * /usr/local/bin/healthcheck_http.sh http://localhost:8080/health 200
 
+
 Level 3 — Advanced / Production-ready
+
 9) myapp.service — example custom systemd service unit
 
 Place /etc/systemd/system/myapp.service
@@ -225,6 +254,7 @@ Commands to enable:
 sudo systemctl daemon-reload
 sudo systemctl enable --now myapp.service
 sudo journalctl -u myapp.service -f
+
 
 10) SSH hardening snippet (/etc/ssh/sshd_config edits)
 
@@ -265,9 +295,12 @@ sudo systemctl reload sshd
 
 Important: keep an open session while testing; don’t lock yourself out.
 
+
+
 11) lvm_setup.sh — create PV, VG, LV and mount (example)
 
 WARNING: This will destroy data on the device. Replace /dev/xvdb with your block device.
+
 
 #!/usr/bin/env bash
 # Usage: sudo ./lvm_setup.sh /dev/xvdb vg_data lv_data 20G /data
@@ -287,6 +320,8 @@ mkdir -p "$MOUNTPOINT"
 echo "/dev/$VG/$LV $MOUNTPOINT ext4 defaults 0 2" >> /etc/fstab
 mount -a
 echo "LVM created and mounted at $MOUNTPOINT"
+
+
 
 12) Firewall snippets
 firewalld (recommended on RHEL/CentOS/Fedora)
@@ -314,6 +349,7 @@ iptables -P OUTPUT ACCEPT
 
 For persistence, install iptables-persistent (Debian) or save rules with service iptables save (RHEL).
 
+
 13) logrotate config for app logs — /etc/logrotate.d/myapp
 /var/log/myapp/*.log {
     daily
@@ -331,6 +367,7 @@ For persistence, install iptables-persistent (Debian) or save rules with service
 
 
 Test: logrotate -d /etc/logrotate.d/myapp (dry run). Actual run: logrotate -f /etc/logrotate.d/myapp.
+
 
 Extra: monitoring quick commands / script
 sysmon.sh — lightweight monitoring snapshot (for cron or collection)
